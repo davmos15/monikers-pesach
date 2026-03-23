@@ -502,7 +502,6 @@ const DEFAULT_CARDS=[
   {id:115,title:"Blood on the Doorposts",cat:"Objects",pts:2,type:"text",img:null,imgPrompt:"",culled:false,desc:"The sign placed by the Israelites on the night of the final plague so their homes would be passed over. It is the origin of the holiday's English name and one of the Torah's most vivid images."},
   {id:116,title:"Leaving in Haste",cat:"Phrases",pts:1,type:"text",img:null,imgPrompt:"",culled:false,desc:"The Israelites departed so quickly that their dough had no time to rise \u2014 the reason we eat matzah. The Torah emphasises the urgency: they were driven out and could not delay."},
   {id:117,title:"Korban Pesach",cat:"Objects",pts:2,type:"text",img:null,imgPrompt:"",culled:false,desc:"The lamb or goat offering brought on the 14th of Nisan and eaten that night with matzah and bitter herbs. It had to be consumed in groups, roasted whole, and none could remain until morning."},
-  {id:118,title:"Dasan and Aviram",cat:"People",pts:3,type:"text",img:null,imgPrompt:"",culled:false,desc:"Two Israelite troublemakers who opposed Moshe at every turn. They quarrelled with him in Egypt, hoarded manna, and joined Korach's rebellion. The Midrash identifies them as the 'two Hebrew men' fighting in the early narrative."},
   {id:119,title:"Splitting of the Sea",cat:"Phrases",pts:1,type:"text",img:null,imgPrompt:"",culled:false,desc:"The miracle that allowed Bnei Yisrael to escape the Egyptian army."}
 ];
 
@@ -735,13 +734,16 @@ function setPts(n){
 }
 
 // ===== FLIP CARD BUILDER =====
-function buildFlipCard(c, container){
+function buildFlipCard(c, container, useLiveForm){
   container.innerHTML='';
   const isPic=c.type==='picture';
-  const liveTitle=document.getElementById('eTitle')?document.getElementById('eTitle').value:c.title;
-  const liveDesc=document.getElementById('eDesc')?document.getElementById('eDesc').value:c.desc;
-  const liveCat=document.getElementById('eCat')?document.getElementById('eCat').value:c.cat;
-  const livePts=editingPts||c.pts;
+  const et=useLiveForm?document.getElementById('eTitle'):null;
+  const ed=useLiveForm?document.getElementById('eDesc'):null;
+  const ec=useLiveForm?document.getElementById('eCat'):null;
+  const liveTitle=(et&&et.value)?et.value:c.title;
+  const liveDesc=(ed&&ed.value)?ed.value:c.desc;
+  const liveCat=(ec&&ec.value)?ec.value:c.cat;
+  const livePts=useLiveForm?editingPts:c.pts;
 
   const front=document.createElement('div');
   front.className='monikers-card'+(isPic?' is-picture':'');
@@ -781,7 +783,7 @@ function buildFlipCard(c, container){
 
 function renderPanelFlip(c){
   const wrap=document.getElementById('panelFlipWrap');
-  if(wrap) buildFlipCard(c, wrap);
+  if(wrap) buildFlipCard(c, wrap, true);
 }
 
 // ===== CARD MODAL =====
@@ -819,6 +821,7 @@ function renderModalEdit(c,container){
   }
 
   // Build inline edit form for mobile
+  modalEditPts=c.pts;
   const form=document.createElement('div');
   form.style.cssText='font-family:"Nunito Sans",sans-serif;';
   form.innerHTML=`
@@ -850,7 +853,6 @@ function renderModalEdit(c,container){
 var modalEditPts=1;
 function modalSetPts(n){
   modalEditPts=n;
-  const c=cards.find(x=>x.id===selectedId);if(c) c.pts=n;
   switchModalTab('edit');
 }
 function modalSave(){
@@ -858,6 +860,7 @@ function modalSave(){
   c.title=document.getElementById('mTitle').value;
   c.desc=document.getElementById('mDesc').value;
   c.cat=document.getElementById('mCat').value;
+  c.pts=modalEditPts;
   document.getElementById('cardModalTitle').textContent=c.title;
   // Sync desktop panel if visible
   if(window.innerWidth>768) selectCard(c.id);
